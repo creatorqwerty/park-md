@@ -1,0 +1,53 @@
+<?php
+
+namespace App\Models;
+
+
+use Illuminate\Support\Str;
+use App\Model\ParkActivity;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Park extends Model
+{
+   protected $fillable = [
+             'name',
+             'street',
+             'city',
+             'country',
+             'area',
+             'opens_at',
+             'closes_at',
+             'google_maps_url',
+             'slug'
+   ];
+
+   public function images()
+   {
+    return $this->hasMany(ParkImage::class);
+   }
+   public function activities()
+   {
+    return $this->hasMany(ParkActivity::class);
+   }
+
+
+   protected static function booted(){
+    static::creating(function ($park){
+        $park->slug = $park->generateUniqueSlug($park->name);
+    });
+   }
+
+   private function generateUniqueSlug($name)
+   {
+      $slug = Str::slug($name);
+
+
+      $coun = Park::where('slug', "like", $slug . "%")->count();
+
+      if ($count) {
+        $slug = $slug ."-" .($count+1);
+      }
+      return $slug;
+   }
+}
